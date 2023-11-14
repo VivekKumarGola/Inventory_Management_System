@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta tags and CSS links -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://getbootstrap.com/docs/5.3/assets/css/docs.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <ul class="nav justify-content-end bg-dark border-bottom border-body" data-bs-theme="dark">
+        <!-- Navigation items -->
+        <li class="nav-item">
+            <a class="nav-link" href="/inventory/">Inventory</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/orderhistory/">Order History</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/billing">Billing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/">Logout</a>
+        </li>
+    </ul>
+
+<h1 class="text-center">Details</h1>
+{% block content %}
+<form action="" method="post" class="post-form">
+    {% csrf_token %}
+    <div class="container" id="mn">
+        <div class="card">
+            <div class="card-header bg-black"></div>
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                        <!-- Company logo or icon -->
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <!-- Customer and company information -->
+                            <ul class="list-unstyled float-start">
+                                <!-- Display customer details dynamically -->
+                                <li>Customer Name: {{ pi.customer_name }}</li>
+                                <li>Customer GST: {{ pi.customer_gst }}</li>
+                                <li>Customer Phone: {{ pi.phone }}</li>
+                            </ul>
+                            <ul class="list-unstyled float-end">
+                                <!-- Display company details -->
+                                <li style="font-size: 20px; color: red;">MCS Company</li>
+                                <li>123, Padam Street</li>
+                                <li>123-456-789</li>
+                                <li>mcs@gmail.com</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <h3 class="text text-center mt-3" style="font-size:25px bold;">Product Details</h3>
+                    </div>
+                    <div class="row mx-3">
+                        <!-- Table to display product details -->
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Product Name</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pi in ps %}
+                                <tr>
+                                    <!-- Display product details dynamically -->
+                                    <td> {{ pi.product_name }}</td>
+                                    <td> {{ pi.quantity }}</td>
+                                    <td> {{ pi.price }}</td>
+                                    <td> {{ pi.total }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-xl-8">
+                        <!-- Display the calculated total dynamically -->
+                        <p class="float-end"style="font-size: 30px; color: red; font-weight: 400; font-family: Arial, Helvetica, sans-serif;">
+                            Net Amount:{{ pi.netamount }}
+                        </p>
+                    </div>
+                        <div class="text-end">
+                            <!-- Display the date -->
+                            <p class="float-end">
+                                Date:{{ pi.date }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-black"></div>
+        </div>
+    </div> 
+    <div class="container col-sm-2">
+        <a href="{% url 'orderhistory' %}" class="btn btn-info">Back to order Hsitory</a>
+    </div>
+</form>
+{% endblock content%}
+</body>
+</html>

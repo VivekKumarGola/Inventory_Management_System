@@ -1,0 +1,66 @@
+<html>
+<head>
+    <title>Main Page</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Festive&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    <style>
+        .my-font {
+            font-family: 'Festive', cursive;
+        }
+
+        .login-font {
+            font-weight: bolder;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .forget-password {
+            font-size: 22px;
+        }
+
+        .para-font {
+            font-family: Brush Script MT;
+            font-size: 45px;
+        }
+    </style>
+
+<body style="background-color: bisque; background-repeat: none; background-size: cover;">
+    <nav class="navbar navbar-expand-sm navbar-dark bg-transparent">
+        <div class="container">
+            <a class="navbar-brand text-light " href="#">
+                <h3 class=" font-weight-bolder display-4  my-font">MCS</h3>
+            </a>
+            <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse"
+                data-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
+                aria-label="Toggle navigation"></button>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div class="row text-center text-dark">
+            <div class="col">
+                <h3 class="display-3 login-font ">Inventory Management System</h3>
+            </div>
+        </div>
+        <div class="col">
+            <div class=" text-center mt-5 ">
+                <a href="/login/" button type="submit"
+                    class=" font-weight-bold forget-password  btn btn-outline-success text-dark">
+                    login <i aria-hidden="true"></i></a>
+                </button>
+                <div class=" text-center mt-5 ">
+                    <a href="/signup/" button type="submit"
+                        class=" font-weight-bold forget-password  btn btn-outline-success text-dark">
+                        Sign up <i aria-hidden="true"></i></a>
+                    </button>
+                </div>
+            </div>
+            </form>
+            <div class="col-4"></div>
+        </div>
+    </div>
+</body>
+</head>
+</html>

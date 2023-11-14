@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing</title>
+    <!-- Include Bootstrap CSS and JS from a CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <ul class="nav justify-content-end bg-dark border-bottom border-body">
+        <li class="nav-item">
+            <a class="nav-link" href="/inventory/">Inventory</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/orderhistory/">Order History</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Billing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/login/">Logout</a>
+        </li>
+    </ul>
+
+    <!-- Invoice Form -->
+    <form action="{% url 'pdf' %}" method="post">
+        {% csrf_token %}
+        <div class="container mt-4">
+            <h1 class="text-center">Create an Invoice</h1>
+            <div class="card">
+                <div class="card-header bg-black"></div>
+                <div class="card-body">
+                    <div class="container">
+                        <!-- Customer Information -->
+                        <div class="mb-3">
+                            <label for="customer_name" class="form-label">Customer Name:</label>
+                            <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customer_gst" class="form-label">Customer GST:</label>
+                            <input type="text" class="form-control" id="customer_gst" name="customer_gst" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Customer Phone No.:</label>
+                            <input type="text" class="form-control" id="phone" name="phone" required>
+                        </div>
+
+                        <!-- Product List -->
+                        <div class="row text-center">
+                            <h3 class="text text-center mt-3" style="font-size: 30px;">Product List:</h3>
+                        </div>
+                        <div class="row mx-3">
+                            <table class="table" id="mytable">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Product Name</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Total</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <select class="js-example-basic-single"
+                                                onchange="$('#quantity').val($(this).children('option:selected').attr('data-val'));$('#price').val($(this).children('option:selected').attr('data-price'));updateTotal(this)"
+                                                name="product_name" required>
+                                                <option hidden default selected>Select Product</option>
+                                                {% for inv in inventory %}
+                                                <option value="{{inv.product_name}}" data-val="{{inv.quantity}}"
+                                                    data-price="{{inv.price}}">{{inv.product_name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td> <input type="text" id="quantity" name="quantity"
+                                                oninput="updateTotal(this)" required></td>
+                                        <td><input type="text" id="price" name="price" oninput="updateTotal(this)"
+                                                required></td>
+                                        <td><input type="text" name="total" disabled></td>
+                                        <td><input type="submit" class="btn btn-danger btn-sm removerow" value="Remove">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Add Product Button -->
+                        <div class="row">
+                            <div class="text-left">
+                                <button type="button" class="btn btn-primary" id="addproduct">Add Product</button>
+                            </div>
+                            <div class="text-center">
+                                <label class="form-label"><strong>Net Amount:</strong></label><span><input type="text"
+                                        id="netamount" name="netamount" disabled></span>
+                            </div>
+                            <div class="text-end">
+                                <label class="form-label"><strong>Date:</strong></label><span><input type="date"
+                                    id="date" name="date"  required></span>
+                                <!-- <label class="date_time" id="date_time" name="date_time" ><strong>Date:{{ current_date|date:"d-m-Y" }}</strong></label>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-black"></div>
+            </div>
+            <!-- Generate Bill Button -->
+            <div class="row mt-3">
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">Generate Bill</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.js-example-basic-single').select2();
+            $("#addproduct").click(function () {
+                var myproduct = '<tr>' +
+                    '<td>' +
+                    '<select class="js-example-basic-single" onchange="updateFields(this)" name="product_name" required>' +
+                    '<option hidden default selected>Select Product</option>' +
+                    ' {% for inv in inventory %}' +
+                    '<option value="{{inv.product_name}}" data-val="{{inv.quantity}}" data-price="{{inv.price}}">{{inv.product_name}}</option>' +
+                    '{% endfor %}' +
+                    '</select>' +
+                    '</td>' +
+                    '<td>' +
+                    '<input type="text" name="quantity" oninput="updateTotal(this)" required>' +
+                    '</td>' +
+                    '<td>' +
+                    '<input type="text" name="price" oninput="updateTotal(this)" required>' +
+                    '</td>' +
+                    '<td>' +
+                    '<input type="text" name="total" disabled>' +
+                    '</td>' +
+                    '<td>' +
+                    '<input type="submit" class="btn btn-danger btn-sm removerow" value="Remove">' +
+                    '</td>' +
+                    '</tr>';
+                $("#mytable tbody").append(myproduct);
+                $("#mytable tbody tr:last .js-example-basic-single").select2();
+            });
+            $("body").on("click", ".removerow", function () {
+                // Clear all input fields in the row
+                $(this).closest("tr").find('input[type="text"]').val("");
+                // Reset Select2
+                $(this).closest("tr").find('.js-example-basic-single').val(null).trigger('change');
+                $(this).closest("tr").find('input[name="total"]').val("");
+                netamount();
+                $(this).closest("tr").remove();
+            });
+        });
+            // Add the current date and time to the label
+           // var currentDate = new Date();
+            //var formattedDate = currentDate.toLocaleString(); // Adjust the format as needed
+            //$(".date_time").text("Date: " + formattedDate);
+
+        function updateFields(select) {
+            var selectedOption = $(select).children('option:selected');
+            $(select).closest("tr").find('input[name="quantity"]').val(selectedOption.attr('data-val'));
+            $(select).closest("tr").find('input[name="price"]').val(selectedOption.attr('data-price'));
+            updateTotal(select);
+        }
+
+        function updateTotal(inputElement) {
+            var quantity = parseFloat(inputElement.parentElement.parentElement.querySelector('input[name="quantity"]').value) || 0;
+            var price = parseFloat(inputElement.parentElement.parentElement.querySelector('input[name="price"]').value) || 0;
+            var total = quantity * price;
+            inputElement.parentElement.parentElement.querySelector('input[name="total"]').value = total.toFixed(2);
+            netamount();
+        }
+
+        function netamount() {
+            var sum = 0;
+            var amts = document.getElementsByName('total');
+            for (let index = 0; index < amts.length; index++) {
+                var amt = amts[index].value;
+                sum = +(sum) + +(amt);
+            }
+            document.getElementById("netamount").value = sum.toFixed(2);
+        }
+    </script>
+</body>
+</html>

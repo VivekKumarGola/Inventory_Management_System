@@ -1,0 +1,244 @@
+dropdown selected items
+
+function updateFields(selectElement) {
+    var selectedOption = selectElement.options[selectElement.selectedIndex];
+    var quantityInput = document.querySelector('input[name="quantity"]');
+    var priceInput = document.querySelector('input[name="price"]');
+    
+    // Set the "Quantity" and "Price" inputs based on the selected option's data attributes
+    quantityInput.value = selectedOption.getAttribute('data-val') || '';
+    priceInput.value = selectedOption.getAttribute('data-price') || '';
+}
+
+<script>
+'<select class="js-example-basic-single"  onchange="$(\'#quantity\').val($(this).children(\'option:selected\').attr(\'data-val\'));$(\'#price\').val($(this).children(\'option:selected\').attr(\'data-price\'));updateTotal(this)"  name="product_name" required><option hidden default selected>Select Product</option> {% for inv in inventory %}<option value="{{inv.product_name}}" data-val="{{inv.quantity}}" data-price="{{inv.price}}">{{inv.product_name}}</option>{% endfor %}</select>'
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#addproduct').change(function () {
+            var selectedOption = $(this).children('option:selected');
+            $('#quantity').val(selectedOption.attr('data-val'));
+            $('#price').val(selectedOption.attr('data-price'));
+            updateTotal(this);
+        });
+    });
+    </script>
+    
+function updateFields(selectElement) {
+    var selectedOption = selectElement.options[selectElement.selectedIndex];
+    var quantityInput = document.querySelector('input[name="quantity"]');
+    var priceInput = document.querySelector('input[name="price"]');
+    // Set the "Quantity" and "Price" inputs based on the selected option's data attributes
+    quantityInput.value = selectedOption.getAttribute('data-val') || '';
+    priceInput.value = selectedOption.getAttribute('data-price') || '';
+    }
+    function updateTotal(inputElement) {
+    var quantity = parseFloat(inputElement.parentElement.parentElement.querySelector('input[name="quantity"]').value) || 0;
+    var price = parseFloat(inputElement.parentElement.parentElement.querySelector('input[name="price"]').value) || 0;
+    var total = quantity * price;
+    inputElement.parentElement.parentElement.querySelector('input[name="total"]').value = total.toFixed(2); // Update the "Total" field
+    }
+
+
+
+
+    <script>$(".js-example-basic-single").on("change", function() { var selectedOption = $(this).find("option:selected"); var quantity = selectedOption.attr("data-val"); var price = selectedOption.attr("data-price"); $("#quantity").val(quantity); $("#price").val(price);if (typeof updateTotal === "function") {updateTotal(this);}});</script>
+
+    onchange="$('#quantity').val($(this).children('option:selected').attr('data-val'));$('#price').val($(this).children('option:selected').attr('data-price'));updateTotal(this)"
+
+    def gen_pdf(request):
+    if request.method == 'POST':
+        customer_name = request.POST.get('customer_name')
+        customer_gst = request.POST.get('customer_gst')
+        phone = request.POST.get('phone')
+        product_names = request.POST.getlist('product_name')
+        quantities = request.POST.getlist('quantity')
+        prices = request.POST.getlist('price')
+        totals = request.POST.getlist('total')
+        netamounts = request.POST.getlist('netamount')
+
+        # Check if all lists have the same length
+        if len(product_names) == len(quantities) == len(prices) == len(totals) == len(netamounts):
+            # Create the invoice object
+            invoice = Invoice.objects.create(
+                customer_name=customer_name, 
+                customer_gst=customer_gst, 
+                phone=phone,
+                netamount=netamounts[0]  # Assuming netamount is a field in your Invoice model
+            )
+
+            # Create product objects using zip to iterate over lists
+            for product_name, quantity, price, total, netamount in zip(product_names, quantities, prices, totals, netamounts):
+                Product.objects.create(
+                    invoice=invoice,
+                    product_name=product_name,
+                    quantity=quantity,
+                    price=price,
+                    total=total,
+                    netamount=netamount,
+                )
+
+            messages.success(request, "Successfully saved")
+            return render(request, 'pdf.html', {'invo': invoice})
+        else:
+            # Handle the case where lists have different lengths (e.g., show an error message)
+            messages.error(request, "Lists have different lengths")
+            return render(request, 'billing.html')
+
+    return render(request, 'billing.html')
+
+
+
+
+
+    def gen_pdf(request):
+    if request.method == 'POST':
+        customer_name = request.POST.get('customer_name')
+        customer_gst = request.POST.get('customer_gst')
+        phone = request.POST.get('phone')
+        product_name = request.POST.getlist('product_name')
+        quantity = request.POST.getlist('quantity')
+        price = request.POST.getlist('price')
+        total = request.POST.getlist('total')
+        netamount = request.POST.getlist('netamount')
+        
+        # Create the invoice object
+        invoice = Invoice.objects.create(
+            customer_name=customer_name,
+            customer_gst=customer_gst,
+            phone=phone,
+            product_name=product_name,
+            quantity=quantity,
+            price=price,
+            total=total,
+            netamount=netamount
+        )
+        
+        for i in range(0, len(product_name)):
+            product = Product.objects.all(product_name=product_name[i])
+            sold_quantity = int(quantity[i])
+            
+            if sold_quantity > 0 and sold_quantity <= product.current_quantity:
+                # Update the current quantity of the product after the sale
+                product.current_quantity -= sold_quantity
+                product.save()
+                
+                # Create a Product entry related to this invoice
+                Product.objects.create(
+                    invoice=invoice,
+                    product_name=product_name[i],
+                    quantity=sold_quantity,
+                    price=price[i],
+                    total=total[i],
+                    netamount=netamount[i]
+                )
+            else:
+                # Handle the case where the sold quantity is invalid
+                messages.error(request, "Invalid quantity for {product_name[i]}")
+        
+        messages.success(request, "Successfully saved")
+        return render(request, 'pdf.html', {'invo': invoice})
+    
+    return render(request, 'billing.html')
+
+add row
+    $('.js-example-basic-single').on('change', function() {
+        var selectedOption = $(this).find('option:selected');
+        var quantity = selectedOption.attr('data-val');
+        var price = selectedOption.attr('data-price');
+        $('#quantity').val(quantity);
+        $('#price').val(price);
+        if (typeof updateTotal === 'function') {
+            updateTotal(this);
+        }
+    });
+
+def gen_pdf(request):
+if request.method == 'POST':
+    customer_name = request.POST.get('customer_name')
+    customer_gst = request.POST.get('customer_gst')
+    phone = request.POST.get('phone')
+    product_name = request.POST.getlist('product_name')
+    quantity = request.POST.getlist('quantity')
+    price = request.POST.getlist('price')
+    total = request.POST.getlist('total')
+    netamount = request.POST.getlist('netamount')
+    invoice = Invoice.objects.create(
+        customer_name=customer_name, customer_gst=customer_gst, phone=phone,
+        product_name=product_name,quantity=quantity, price=price, total=total, netamount=netamount)
+    for i in range(0,len(product_name)):
+        Product.objects.create(
+            invoice=invoice,
+            product_name=product_name[i],
+            quantity=quantity[i],
+            price=price[i],
+            total=total,
+            netamount=netamount
+        )
+        if request.method == 'POST':
+            form = InvoiceForm(request.POST)
+            if form.is_valid():
+                invoice = form.save()
+                product = invoice.product_name
+                product.quantity -= invoice.quantity
+                product.save()
+            return redirect('billing')
+    messages.success(request, "Successfully saved")        
+    return render(request, 'pdf.html',{'invo': invoice})
+    inventory = Inventory.objects.all()
+return render(request, 'billing.html', {'inventory': inventory})
+
+
+
+# Sample lists
+list1 = [1, 2, 3]
+list2 = [4, 5, 6]
+
+# Multiply the elements element-wise
+result_list = [x * y for x, y in zip(list1, list2)]
+
+# Find the sum of the resulting list
+result_sum = sum(result_list)
+
+# Print the result
+print("Result list after element-wise multiplication:", result_list)
+print("Sum of the result list:", result_sum)
+
+
+def view(request, id):
+    customer = Invoice.objects.get(id=id)
+    if request.method == 'POST':
+        fm = InvoiceForm(request.POST, instance=customer)
+        if fm.is_valid():
+            fm.save()
+            return redirect('orderhistory')
+    else:
+        fm = InvoiceForm(instance=customer)
+    return render(request, 'view.html', {'form': fm, 'pi': customer.invoice.all()})
+
+    def gen_pdf(request):
+    if request.method == 'POST':
+        customer_name = request.POST.get('customer_name')
+        customer_gst = request.POST.get('customer_gst')
+        phone = request.POST.get('phone')
+        product_name = request.POST.getlist('product_name')
+        quantity = request.POST.getlist('quantity')
+        price = request.POST.getlist('price')
+        total = request.POST.getlist('total')
+        netamount = request.POST.get('netamount')
+        invoice = Invoice.objects.create(
+            customer_name=customer_name, customer_gst=customer_gst, phone=phone,
+            product_name=product_name,quantity=quantity, price=price, total=total, netamount=netamount)
+        for i in range(0,len(product_name)):
+            Product.objects.create(
+                invoice=invoice,
+                product_name=product_name[i],
+                quantity=quantity[i],
+                price=price[i],
+                total=total[i],
+                netamount=netamount
+            )
+        messages.success(request, "Successfully saved")        
+        return render(request, 'pdf.html',{'invo': invoice})
+    return render(request, 'billing.html')
